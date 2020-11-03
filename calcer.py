@@ -3,29 +3,35 @@ import operator
 
 root = Tk()
 root.title('Calculator')
+
+# Creates dict for operators and list for identifying operators
 ops = {'•': operator.mul, '/': operator.truediv,
        '+': operator.add, '_': operator.sub}
 expressions = ['/', '•', '_', '+']
 
-
+# Creates entry box object
 e = Entry(root, width=30, borderwidth=5)
-e.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
 
 
 def MD(type, rawS):
     entered = rawS
+    # Checks for operator type in str
     while type in entered:
         for i in range(len(entered)):
+            # Ignores i if str range out of bounds
             try:
                 if entered[i] == type:
                     expressionsL = [0]
                     expressionsR = []
+                    # Looks for other operators on the left and right of found operator
                     for exp in expressions:
                         if entered.rfind(exp, 0, i) != -1:
                             expressionsL.append(entered.rfind(exp, 0, i))
                         if entered.find(exp, i+1) != -1:
                             expressionsR.append(entered.find(exp, i+1))
                     closeL = max(expressionsL)
+                    entered = entered.replace('~', '-')
+                    # If there are no operators on the left of selected operator
                     if closeL == 0:
                         if expressionsR:
                             closeR = (min(expressionsR))
@@ -36,17 +42,21 @@ def MD(type, rawS):
                             middle = str(
                                 '%.2f' % (ops[type](float(entered[closeL:i]), float(entered[i+1:]))))
                             entered = (middle)
+                    # If there are operators on the left and right of selected operator
                     elif expressionsR:
                         closeR = (min(expressionsR))
                         middle = str(
                             '%.2f' % (ops[type](float(entered[closeL+1:i]), float(entered[i+1:closeR]))))
                         entered = (entered[:closeL+1]+middle+entered[closeR:])
+                    # If there are no operators on the right of selected operator
                     else:
                         middle = str(
                             '%.2f' % (ops[type](float(entered[closeL+1:i]), float(entered[i+1:]))))
                         entered = (entered[:closeL+1]+middle)
+                    entered = entered.replace('~', '-')
             except:
                 pass
+    entered = entered.replace('-', '~')
     return entered
 
 
@@ -61,8 +71,9 @@ def button_clear():
 
 
 def button_equal():
-    final = e.get()
-    final = final.replace('-', '_')
+    # Changes minus to diff identifier for subtraction to allow negative operations
+    final = e.get().replace('-', '_')
+    # Cycles through for every operator
     for exp in expressions:
         final = (MD(exp, final))
     e.delete(0, END)
@@ -99,12 +110,15 @@ button_divide = Button(root, text='/', padx=41, pady=20,
                        command=lambda: button_click('/'))
 button_mult = Button(root, text='*', padx=41, pady=20,
                      command=lambda: button_click('•'))
+button_neg = Button(root, text='~', padx=40,
+                    pady=20, command=lambda: button_click('~'))
 button_clear = Button(root, text='Clear', padx=27.4,
                       pady=20, command=button_clear)
-button_equal = Button(root, text='=', padx=127.5,
+button_equal = Button(root, text='=', padx=91,
                       pady=20, command=button_equal)
 
-# Put buttons on the screen
+# Put objects on the screen
+e.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
 button_1.grid(row=3, column=0)
 button_2.grid(row=3, column=1)
 button_3.grid(row=3, column=2)
@@ -119,13 +133,15 @@ button_9.grid(row=1, column=2)
 
 button_0.grid(row=4, column=1)
 button_add.grid(row=4, column=2)
+button_clear.grid(row=4, column=0)
 
 
 button_mult.grid(row=5, column=0)
 button_divide.grid(row=5, column=1)
 button_subtract.grid(row=5, column=2)
 
-button_equal.grid(row=6, column=0, columnspan=3)
-button_clear.grid(row=4, column=0)
+button_equal.grid(row=6, column=0, columnspan=2)
+button_neg.grid(row=6, column=2)
 
 root.mainloop()
+
